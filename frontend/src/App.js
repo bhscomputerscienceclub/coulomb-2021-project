@@ -1,20 +1,41 @@
 import logo from './logo.svg';
 import './App.css';
 import Draggable from 'react-draggable';
-class App extends React.Component {
+import React, { Component } from 'react';
+
+class App extends Component {
+	  constructor(props) {
+    super(props);
+    this.state = {
+	    tasks: [
+		    {heading: "hello", contents: "abc"},
+		    {heading: "hello", contents: "abc"},
+		    {heading: "hello", contents: "abc"},
+		    {heading: "hello", contents: "abc"},
+		    {heading: "hello", contents: "abc"}
+	    ]
+    };
+	  }
+
   render() {
+var tasks =	 this.state.tasks.map(function (v) {
+return 	(
+<Box task={v}/>
+	);
+});
     return (
-      <Draggable>  
-
-
-
-        
-      <div>
-        <h1>Hello, world!</h1>
-        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>
-      </div>
-      </Draggable>
+    <div>
+	    {tasks}
+	    </div>
     );
   }
+}
+
+function Box(props) {
+return (
+<Draggable>
+	<h3>{props.task.heading}</h3> 
+</Draggable>
+);
 }
 export default App;
