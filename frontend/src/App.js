@@ -105,6 +105,13 @@ class App extends Component {
     return (
       <div>
         <div className="container1">
+          <div className="login">
+            <input class = "logininput" type='text' size = "32" placeholder='Username' />
+            <br></br>
+            <input class = "logininput" type='password' size = "32" placeholder='Password' />
+            <br></br>
+            <button className="button1">Login</button>
+          </div>
           <div className="note">
             <textarea
               cols="16"

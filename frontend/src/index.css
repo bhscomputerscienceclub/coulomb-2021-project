@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #fff;
 }
 
 code {
@@ -48,11 +49,19 @@ textarea.cont{
   font-family: "Roboto", sans-serif;
   font-size: 16px;
 }
+
+input.logininput{
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-color: transparent;
+}
 .container {
   display: flex;
   flex-direction: column;
   width:fit-content;
   margin: auto;
+  background-color: #fff;
 }
 
 .container1 {
@@ -61,7 +70,6 @@ textarea.cont{
   flex-direction: column;
   width:fit-content;
   margin: auto;
-  
   padding: 30px;
 }
 
@@ -69,6 +77,15 @@ textarea.cont{
   justify-self: center;
   padding: 10px;
   border: solid 5px;
+  align-self: center;
+  text-align: center;
+}
+
+.login {
+  justify-self: center;
+  padding: 10px;
+  border: solid 5px;
+  border-bottom: 0px;
   align-self: center;
   text-align: center;
 }
