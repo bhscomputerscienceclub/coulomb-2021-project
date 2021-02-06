@@ -1,10 +1,16 @@
 import "./App.css";
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 
 import React, { Component } from "react";
 import Draggable from "react-draggable";
+import Loader from "react-loader-spinner";
 
 var oldPos = [];
-function APIgetAll() {
+async function APIgetAll() {
+  let response = await fetch("/notes", {});
+
+  let result = await response.json();
+  console.log(result);
   return [
     { id: 1, heading: "hello", contents: "abc", pos: (0, 0) },
     { id: 2, heading: "hello", contents: "abc" },
@@ -25,25 +31,23 @@ async function APIsave(note) {
   return result.id;
 }
 async function APIloggedIn() {
-  return true;
   let response = await fetch("/user", {
     method: "GET",
   });
 
   let result = await response.json();
-  console.log(result);
-  return result.login;
+  return result;
 }
 
 async function APILogin(user, pass) {
-  let response = await fetch("/", {
+  let response = await fetch("/user", {
     method: "POST",
-    body: JSON.stringify({ user: user, pass: pass }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: user, password: pass }),
   });
 
   let result = await response.json();
-  console.log(result);
-  return result.login;
+  return result;
 }
 
 function APIdeleteNote(id) {
@@ -65,6 +69,13 @@ class App extends Component {
     this.state = {
       tasks: [],
     };
+    this.myRefs = {
+      uname: React.createRef(),
+      password: React.createRef(),
+      newNoteHeading: React.createRef(),
+      newNoteContent: React.createRef(),
+    };
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async del(id) {
@@ -81,11 +92,24 @@ class App extends Component {
   pos() {
     console.log("a");
   }
-
+  async handleSubmit(event) {
+    event.preventDefault();
+    if (event.target.firstChild.id === "loginForm") {
+      this.setState({ loading: true });
+      this.state.username = await APILogin(
+        this.myRefs.uname.current.value,
+        this.myRefs.password.current.value
+      );
+      if (this.state.username) this.logIn();
+      this.setState({ loading: false });
+    } else if (event.target.firstChild.id == "newNoteForm") {
+      console.log("newnote");
+    } else console.log(event);
+  }
   async componentDidMount() {
-    this.loggedIn = await APIloggedIn();
+    this.state.username = await APIloggedIn();
 
-    if (this.loggedIn === true) this.logIn();
+    if (this.state.username) this.logIn();
   }
   componentWillUnmount() {
     clearInterval(this.interval);
@@ -99,38 +123,70 @@ class App extends Component {
   }
 
   render() {
+    if (this.state.loading)
+      return <Loader type="Puff" color="#00BFFF" height={100} width={100} />;
+
     var tasks = this.state.tasks.map(function (v) {
       return <Box task={v} />;
     });
+    if (!this.state.username)
+      return (
+        <div className="container1">
+          <form onSubmit={this.handleSubmit}>
+            <div className="login" id="loginForm">
+              <input
+                className="logininput"
+                type="text"
+                size="32"
+                placeholder="Username"
+                name="username"
+                ref={this.myRefs.uname}
+              />{" "}
+              <br></br>{" "}
+              <input
+                className="logininput"
+                type="password"
+                size="32"
+                placeholder="Password"
+                ref={this.myRefs.password}
+              />
+              <br></br>
+              <input className="button1" type="submit" value="Submit" />
+            </div>
+          </form>
+        </div>
+      );
     return (
-      <div>
+      <>
         <div className="container1">
           <div className="login">
-            <input class = "logininput" type='text' size = "32" placeholder='Username' />
-            <br></br>
-            <input class = "logininput" type='password' size = "32" placeholder='Password' />
-            <br></br>
-            <button className="button1">Login</button>
+            <p>{this.state.username}</p>
           </div>
           <div className="note">
-            <textarea
-              cols="16"
-              className="head"
-              placeholder="Heading"
-            ></textarea>
-            <br></br>
-            <textarea
-              cols="30"
-              rows="10"
-              className="cont"
-              placeholder="Note"
-            ></textarea>
-            <br></br>
-            <button className="button1">Add</button>
+            <form onSubmit={this.handleSubmit} id="newNoteForm">
+              <textarea
+                cols="16"
+                className="head"
+                form="newNoteForm"
+                placeholder="Heading"
+                ref={this.myRefs.newNoteHeading}
+              ></textarea>
+              <br></br>
+              <textarea
+                cols="30"
+                rows="10"
+                form="newNoteForm"
+                className="cont"
+                placeholder="Note"
+                ref={this.myRefs.newNoteContent}
+              ></textarea>
+              <br></br>
+              <input type="submit" value="Add" className="button1" />
+            </form>
           </div>
         </div>
         {tasks}
-      </div>
+      </>
     );
   }
 }

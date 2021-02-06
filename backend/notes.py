@@ -1,14 +1,13 @@
 from flask import Flask, request, jsonify, session
 import json
 from datetime import timedelta
-username = ''
 app = Flask(__name__)
 app.secret_key = 'App'
 app.permanent_session_lifetime = timedelta(days=1000)
 notes = [{"id": 0, "note": "First note"}, {"id": 1, "note": "Second note"}]
 
 
-@app.route('/all', methods=['GET'])
+@app.route('/notes', methods=['GET'])
 def notes_page():
     return jsonify(notes)
 
@@ -36,18 +35,31 @@ def deleting(id):
         return True
 
 @app.route('/user', methods=['GET', 'POST'])
+def check_user_req():
+    return jsonify(check_user())
 def check_user():
-    global username
+    if request.method == "GET":
+        return session.get("user", False)
+
     if "user" not in session:
         if request.method == 'POST':
             session.permanent = True
-            username = request.form["username"]
-            session["user"] = username
+            data = {}
             try:
-                with open(f'{username}.json', 'r') as fp:
-                    data = json.load(fp)
+                username = request.json["username"]
+                try:
+                    with open(f'{username}.json', 'r') as fp:
+                        data = json.load(fp)
+                    if data["password"] != request.json["password"]: return False
+                except FileNotFoundError as e:
+                    print("newuser", e)
+                    with open(f'{username}.json', 'w') as fp:
+                        data["password"] = request.json["password"]
+                        json.dump(data, fp)
+                session["user"] = username
                 return True
-            except:
+            except KeyError as e:
+                print("loginfail", e)
                 return False
 
 
