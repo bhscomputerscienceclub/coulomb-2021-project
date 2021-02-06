@@ -4,13 +4,12 @@ from datetime import timedelta
 username = ''
 app = Flask(__name__)
 app.secret_key = 'App'
-app.permanent_session_lifetime = timedelta(minutes=5)
+app.permanent_session_lifetime = timedelta(days=1000)
 notes = [{"id": 0, "note": "First note"}, {"id": 1, "note": "Second note"}]
 
 
 @app.route('/all', methods=['GET'])
 def notes_page():
-
     return jsonify(notes)
 
 
@@ -24,6 +23,17 @@ def note_page(id):
                 results.append(note)
         return jsonify(results)
 
+
+@app.route('/delete/<id>', methods=['GET'])
+def deleting(id):
+    if request.method == 'GET':
+        id = int(id)
+        for note in notes:
+            if note["id"] == id:
+                notes.remove(note)
+        with open(f"{username}.json", 'w') as fp:
+            json.dump(notes, fp)
+        return True
 
 @app.route('/user', methods=['GET', 'POST'])
 def check_user():
@@ -47,7 +57,7 @@ def create_note():
     data['id'] = request.form["id"]
     data["note"] = request.form["note"]
     notes.append(data)
-    with open(f"{username}.json", 'a') as fp:
+    with open(f"{username}.json", 'w') as fp:
         json.dump(notes, fp)
 
 
