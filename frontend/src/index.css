@@ -1,0 +1,111 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #fff;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+p.ncont {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  min-height: 100px;
+  min-width: 150px;
+  margin-top: .25em;
+  margin-bottom: .75em;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+h3.nhead {
+  font-family: "Roboto", sans-serif;
+  font-size: 26px;
+  font-weight: bolder;
+  margin-top: 0em;
+  margin-bottom: .75em;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+textarea {
+  resize: none;
+  border: 6px;
+}
+
+textarea.head{
+  font-family: "Roboto", sans-serif;
+  text-align: center;
+  font-size: 26px;
+  font-weight: bolder;
+}
+textarea.cont{
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+}
+
+input.logininput{
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-color: transparent;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  width:fit-content;
+  margin: auto;
+  background-color: #fff;
+}
+
+.container1 {
+  display: flex;
+  float:left;
+  flex-direction: column;
+  width:fit-content;
+  margin: auto;
+  padding: 30px;
+}
+
+.note {
+  justify-self: center;
+  padding: 10px;
+  border: solid 5px;
+  align-self: center;
+  text-align: center;
+}
+
+.login {
+  justify-self: center;
+  padding: 10px;
+  border: solid 5px;
+  border-bottom: 0px;
+  align-self: center;
+  text-align: center;
+}
+
+.button1 {
+  padding: 10px 20px;
+  font-family: "Roboto", sans-serif;
+  font-weight: 700;
+  background: transparent;
+  outline: none !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+  border: 2px solid #000;
+}
+.button1:hover {
+  background: #000;
+  color: #fff;
+}
+.button1:active {
+  top: 2px;
+}
