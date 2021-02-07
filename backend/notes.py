@@ -57,7 +57,7 @@ def check_user():
                         data["password"] = request.json["password"]
                         json.dump(data, fp)
                 session["user"] = username
-                return True
+                return username
             except KeyError as e:
                 print("loginfail", e)
                 return False

@@ -40,6 +40,9 @@ async function APIloggedIn() {
 }
 
 async function APILogin(user, pass) {
+  if (user.length == 0 || pass.length == 0) {
+    return false;
+  }
   let response = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -96,18 +99,22 @@ class App extends Component {
     event.preventDefault();
     if (event.target.firstChild.id === "loginForm") {
       this.setState({ loading: true });
-      this.state.username = await APILogin(
+      let uname = await APILogin(
         this.myRefs.uname.current.value,
         this.myRefs.password.current.value
       );
+      this.setState({
+        username: uname,
+      });
       if (this.state.username) this.logIn();
+      else alert("login didn't work hms...");
       this.setState({ loading: false });
     } else if (event.target.firstChild.id == "newNoteForm") {
       console.log("newnote");
     } else console.log(event);
   }
   async componentDidMount() {
-    this.state.username = await APIloggedIn();
+    this.setState({ username: await APIloggedIn() });
 
     if (this.state.username) this.logIn();
   }
