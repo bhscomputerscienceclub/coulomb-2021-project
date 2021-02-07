@@ -160,9 +160,9 @@ class App extends Component {
       <>
         <div className="container1">
           <div className="login">
-            <p>{this.state.username}</p>
+            <p className="name">{this.state.username}</p>
           </div>
-          <div className="note">
+          <div className="unote">
             <form onSubmit={this.handleSubmit} id="newNoteForm">
               <textarea
                 cols="16"
