@@ -9,7 +9,6 @@ notes = [{"id": 0, "note": "First note"}, {"id": 1, "note": "Second note"}]
 # user data stored as {"password": "1234", "notes": [ "server stuff" ]},
 
 def writeUser(uname, stuff):
-    print(stuff)
     try:
         json.dump(stuff,open(f'data/{uname}.json', 'w'))
         return True
@@ -34,12 +33,19 @@ def notes_page():
         writeUser(session["user"], data) 
         return jsonify(True)
 
-@app.route('/notes/<id>', methods=['GET', "DELETE"])
+@app.route('/notes/<id>', methods=['GET',"PUT", "DELETE"])
 def note_page(id):
     id = int(id)
     if request.method == 'GET':
         return jsonify(readUser(session["user"])["notes"][id]) 
-    if request.method == "DELETE":
+    elif request.method == "PUT":
+        try:
+            data = readUser(session["user"])
+            data["notes"][id] = request.json["note"]
+            writeUser(session["user"], data)
+            return jsonify(True)
+        except: return jsonify(False)
+    elif request.method == "DELETE":
         try:
             data = readUser(session["user"])
             data["notes"].pop(id)

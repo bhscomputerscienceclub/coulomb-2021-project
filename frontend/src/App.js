@@ -35,7 +35,7 @@ async function APIloggedIn() {
 }
 
 async function APILogin(user, pass) {
-  if (user.length == 0 || pass.length == 0) {
+  if (user.length === 0 || pass.length === 0) {
     return false;
   }
   let response = await fetch("/user", {
@@ -55,10 +55,16 @@ function APIdeleteNote(id) {
 }
 
 function APIpos(newPos) {
-  newPos.map(function (e, i) {
-    if (oldPos[i].pos !== e.pos) {
-      console.log(e.pos);
+  newPos.forEach((v, i) => {
+    if (oldPos[i] !== v.pos[0] + v.pos[1]) {
+      console.log("change" + i);
+      fetch("/notes/" + i, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: JSON.stringify(v) }),
+      });
     }
+    oldPos[i] = v.pos[0] + v.pos[1];
   });
 }
 class App extends Component {
@@ -73,11 +79,17 @@ class App extends Component {
       newNoteHeading: React.createRef(),
       newNoteContent: React.createRef(),
     };
+    this.draggableMoved = false;
+
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  async del(id) {
-    this.state.tasks = this.state.tasks.filter((value) => value.id === id);
+  del(id) {
+    var tasks = this.state.tasks;
+    tasks.splice(id, 1);
+    this.setState({
+      tasks: tasks,
+    });
     APIdeleteNote(id);
   }
 
@@ -89,7 +101,10 @@ class App extends Component {
   }
 
   pos() {
-    console.log("a");
+    if (this.draggableMoved) {
+      this.draggableMoved = false;
+      APIpos(this.state.tasks);
+    }
   }
   async handleSubmit(event) {
     event.preventDefault();
@@ -105,11 +120,14 @@ class App extends Component {
       if (this.state.username) this.logIn();
       else alert("login didn't work hms...");
       this.setState({ loading: false });
-    } else if (event.target.id == "newNoteForm") {
+    } else if (event.target.id === "newNoteForm") {
       await this.add({
         heading: this.myRefs.newNoteHeading.current.value,
-        content: this.myRefs.newNoteHeading.current.value,
+        content: this.myRefs.newNoteContent.current.value,
+        pos: [0, 0],
       });
+      this.myRefs.newNoteHeading.current.value = "";
+      this.myRefs.newNoteContent.current.value = "";
     } else console.log(event);
   }
   async componentDidMount() {
@@ -127,14 +145,30 @@ class App extends Component {
     });
     this.interval = setInterval(() => this.pos(this.state.tasks), 1000);
   }
+  posState(i, d) {
+    var tasks = this.state.tasks.slice();
+    tasks[i].pos = [d.x, d.y];
+    this.setState({ tasks: tasks });
+    this.draggableMoved = true;
+  }
 
   render() {
     if (this.state.loading)
       return <Loader type="Puff" color="#00BFFF" height={100} width={100} />;
 
-    var tasks = this.state.tasks.map(function (v) {
-      return <Box task={v} />;
-    });
+    var tasks = [];
+    for (var i = 0; i < this.state.tasks.length; i++) {
+      let num = i;
+      tasks.push(
+        <Box
+          task={this.state.tasks[i]}
+          key={num}
+          onDrag={(e, d) => this.posState(num, d)}
+          del={() => this.del(num)}
+        />
+      );
+    }
+
     if (!this.state.username)
       return (
         <div className="container1">
@@ -191,7 +225,7 @@ class App extends Component {
             </form>
           </div>
         </div>
-        {tasks}
+        <div>{tasks}</div>
       </>
     );
   }
@@ -199,12 +233,18 @@ class App extends Component {
 
 function Box(props) {
   return (
-    <Draggable handle=".container">
+    <Draggable
+      handle=".container"
+      onStop={props.onDrag}
+      defaultPosition={{ x: props.task.pos[0], y: props.task.pos[1] }}
+    >
       <div className="container">
         <div className="note">
           <h3 className="nhead">{props.task.heading}</h3>
           <p className="ncont">{props.task.content}</p>
-          <button className="button1">Delete</button>
+          <button className="button1" onClick={props.del}>
+            Delete
+          </button>
         </div>
       </div>
     </Draggable>
