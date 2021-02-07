@@ -11,24 +11,19 @@ async function APIgetAll() {
 
   let result = await response.json();
   console.log(result);
-  return [
-    { id: 1, heading: "hello", contents: "abc", pos: (0, 0) },
-    { id: 2, heading: "hello", contents: "abc" },
-    { id: 3, heading: "hello", contents: "abc" },
-    { id: 4, heading: "hello", contents: "abc" },
-    { id: 5, heading: "hello", contents: "abc" },
-  ];
+
+  return result.map((v) => JSON.parse(v));
 }
 
 async function APIsave(note) {
   let response = await fetch("/notes", {
     method: "POST",
-    body: JSON.stringify(note),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ note: JSON.stringify(note) }),
   });
 
   let result = await response.json();
   console.log(result);
-  return result.id;
 }
 async function APIloggedIn() {
   let response = await fetch("/user", {
@@ -87,9 +82,10 @@ class App extends Component {
   }
 
   async add(obj) {
-    this.state.tasks.push(obj);
-    obj.id = await APIsave(obj);
-    console.log(this.state.tasks.slice(-1)[0]);
+    this.setState({
+      tasks: this.state.tasks.concat(obj),
+    });
+    await APIsave(obj);
   }
 
   pos() {
@@ -109,8 +105,11 @@ class App extends Component {
       if (this.state.username) this.logIn();
       else alert("login didn't work hms...");
       this.setState({ loading: false });
-    } else if (event.target.firstChild.id == "newNoteForm") {
-      console.log("newnote");
+    } else if (event.target.id == "newNoteForm") {
+      await this.add({
+        heading: this.myRefs.newNoteHeading.current.value,
+        content: this.myRefs.newNoteHeading.current.value,
+      });
     } else console.log(event);
   }
   async componentDidMount() {
@@ -204,7 +203,7 @@ function Box(props) {
       <div className="container">
         <div className="note">
           <h3 className="nhead">{props.task.heading}</h3>
-          <p className="ncont">{props.task.contents}</p>
+          <p className="ncont">{props.task.content}</p>
           <button className="button1">Delete</button>
         </div>
       </div>

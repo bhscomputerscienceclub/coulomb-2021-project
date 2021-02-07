@@ -1,38 +1,52 @@
 from flask import Flask, request, jsonify, session
 import json
+import os
 from datetime import timedelta
 app = Flask(__name__)
 app.secret_key = 'App'
 app.permanent_session_lifetime = timedelta(days=1000)
 notes = [{"id": 0, "note": "First note"}, {"id": 1, "note": "Second note"}]
+# user data stored as {"password": "1234", "notes": [ "server stuff" ]},
 
-
-@app.route('/notes', methods=['GET'])
-def notes_page():
-    return jsonify(notes)
-
-
-@app.route('/note/<id>', methods=['GET'])
-def note_page(id):
-    if request.method == 'GET':
-        id = int(id)
-        results = []
-        for note in notes:
-            if note["id"] == id:
-                results.append(note)
-        return jsonify(results)
-
-
-@app.route('/delete/<id>', methods=['GET'])
-def deleting(id):
-    if request.method == 'GET':
-        id = int(id)
-        for note in notes:
-            if note["id"] == id:
-                notes.remove(note)
-        with open(f"{username}.json", 'w') as fp:
-            json.dump(notes, fp)
+def writeUser(uname, stuff):
+    print(stuff)
+    try:
+        json.dump(stuff,open(f'data/{uname}.json', 'w'))
         return True
+    except FileNotFoundError: 
+        print("write error" + uname , e)
+        return False 
+
+def readUser(uname):
+    try:
+        return json.load(open(f'data/{uname}.json', 'r'))
+    except FileNotFoundError: return {}
+
+@app.route('/notes', methods=['GET', "POST"])
+def notes_page():
+    if request.method == "GET":
+        j = readUser(session["user"])
+        return jsonify(j.get('notes', []))
+    elif request.method == "POST":
+        data = readUser(session["user"])
+        if "notes" not in data.keys(): data["notes"] = []
+        data['notes'].append(request.json.get("note", ""))
+        writeUser(session["user"], data) 
+        return jsonify(True)
+
+@app.route('/notes/<id>', methods=['GET', "DELETE"])
+def note_page(id):
+    id = int(id)
+    if request.method == 'GET':
+        return jsonify(readUser(session["user"])["notes"][id]) 
+    if request.method == "DELETE":
+        try:
+            data = readUser(session["user"])
+            data["notes"].pop(id)
+            writeUser(session["user"], data)
+            return jsonify(True)
+        except: return jsonify(False)
+
 
 @app.route('/user', methods=['GET', 'POST'])
 def check_user_req():
@@ -48,12 +62,12 @@ def check_user():
             try:
                 username = request.json["username"]
                 try:
-                    with open(f'{username}.json', 'r') as fp:
+                    with open(f'data/{username}.json', 'r') as fp:
                         data = json.load(fp)
                     if data["password"] != request.json["password"]: return False
                 except FileNotFoundError as e:
                     print("newuser", e)
-                    with open(f'{username}.json', 'w') as fp:
+                    with open(f'data/{username}.json', 'w') as fp:
                         data["password"] = request.json["password"]
                         json.dump(data, fp)
                 session["user"] = username
@@ -63,15 +77,6 @@ def check_user():
                 return False
 
 
-@app.route('/uid/notes/createnote', methods=['POST'])
-def create_note():
-    data = {"id": 0, "note": ""}
-    data['id'] = request.form["id"]
-    data["note"] = request.form["note"]
-    notes.append(data)
-    with open(f"{username}.json", 'w') as fp:
-        json.dump(notes, fp)
-
-
 if "__main__" == __name__:
+    os.makedirs("data", exist_ok=True)
     app.run(debug=True)
