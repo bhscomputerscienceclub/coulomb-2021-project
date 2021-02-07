@@ -2,8 +2,13 @@ from flask import Flask, request, jsonify, session
 import json
 import os
 from datetime import timedelta
-app = Flask(__name__)
-app.secret_key = 'App'
+app = Flask(__name__, static_folder='./build', static_url_path='/')
+try:
+    key = open('data/secret_key', 'rb').read()
+except:
+    key = os.urandom(16)
+    open('data/secret_key', 'wb').write(key)
+app.secret_key = key
 app.permanent_session_lifetime = timedelta(days=1000)
 notes = [{"id": 0, "note": "First note"}, {"id": 1, "note": "Second note"}]
 # user data stored as {"password": "1234", "notes": [ "server stuff" ]},
@@ -20,6 +25,10 @@ def readUser(uname):
     try:
         return json.load(open(f'data/{uname}.json', 'r'))
     except FileNotFoundError: return {}
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
 
 @app.route('/notes', methods=['GET', "POST"])
 def notes_page():
